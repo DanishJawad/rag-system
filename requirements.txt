@@ -19,6 +19,8 @@ black==26.5.1
     # via rag-system (pyproject.toml)
 blinker==1.9.0
     # via streamlit
+chromadb>=1.0.0
+    # via rag-system (pyproject.toml)
 cachetools==7.1.4
     # via streamlit
 certifi==2026.5.20
@@ -35,8 +37,6 @@ click==8.4.1
     #   streamlit
     #   typer
     #   uvicorn
-faiss-cpu==1.14.2
-    # via rag-system (pyproject.toml)
 filelock==3.29.1
     # via
     #   huggingface-hub
@@ -118,6 +118,8 @@ langgraph-sdk==0.4.2
     # via langgraph
 langsmith==0.8.9
     # via langchain-core
+langchain-ollama>=0.3.0
+    # via rag-system (pyproject.toml)
 markdown-it-py==4.2.0
     # via rich
 markupsafe==3.0.3
@@ -137,7 +139,6 @@ networkx==3.6.1
 numpy==2.4.6
     # via
     #   rag-system (pyproject.toml)
-    #   faiss-cpu
     #   pandas
     #   pydeck
     #   scikit-learn
@@ -155,7 +156,6 @@ packaging==26.2
     # via
     #   altair
     #   black
-    #   faiss-cpu
     #   huggingface-hub
     #   langchain-core
     #   langsmith
