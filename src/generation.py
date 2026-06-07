@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional
 import logging
+import os
 
 from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -14,7 +15,7 @@ class AnswerGenerator:
     gracefully surface useful errors if the model call fails.
     """
 
-    def __init__(self, model_name: str = "qwen3:1.7b", temperature: float = 0.0):
+    def __init__(self, model_name: str = os.getenv("OLLAMA_MODEL","qwen3:1.7b"), temperature: float = 0.0):
         self.model_name = model_name
         self.temperature = temperature
         self.llm = ChatOllama(model=model_name, temperature=temperature)

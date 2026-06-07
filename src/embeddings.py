@@ -6,7 +6,7 @@ import os
 
 class EmbeddingGenerator:
 
-    def __init__(self, model_name: str = "nomic-embed-text"):
+    def __init__(self, model_name: str = os.getenv("EMBEDDING_MODEL", "nomic-embed-text:latest")):
         self.model_name = model_name
         self.model = OllamaEmbeddings(model=model_name)
 
