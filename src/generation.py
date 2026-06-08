@@ -20,7 +20,7 @@ class AnswerGenerator:
         self.temperature = temperature
         self.llm = ChatOllama(model=model_name, temperature=temperature)
 
-    def _build_prompt(self, query: str, retrieved_chunks: List[dict]) -> List:
+    def _build_prompt(self, query: str, retrieved_chunks: List[dict],conversation_context: str = "") -> List:
         context = "\n\n".join([f"[{c['document']}]\n{c['text']}" for c in retrieved_chunks])
 
         system_prompt = (
@@ -30,7 +30,18 @@ class AnswerGenerator:
             "Do NOT guess, infer, or use outside knowledge."
         )
 
-        human_text = f"Documents:\n{context}\n\nQuestion: {query}\n\nAnswer:"
+        human_text = f"""
+                        Conversation History:
+                        {conversation_context}
+
+                        Documents:
+                        {context}
+
+                        Question:
+                        {query}
+
+                        Answer:
+                        """
 
         return [SystemMessage(content=system_prompt), HumanMessage(content=human_text)]
 
@@ -56,12 +67,16 @@ class AnswerGenerator:
                 logger.exception("LLM generate failed: %s", exc)
                 raise
 
-    def generate_answer(self, query: str, retrieved_chunks: List[dict]) -> Dict[str, Optional[object]]:
+    def generate_answer( self, query: str, retrieved_chunks: List[dict],conversation_context: str = "") -> Dict[str, Optional[object]]:
         """Generate a grounded answer from retrieved chunks.
 
         Returns a dict with keys: `answer` (str) and `retrieved_chunks` (list).
         """
-        messages = self._build_prompt(query, retrieved_chunks)
+        messages = self._build_prompt(
+                        query,
+                        retrieved_chunks,
+                        conversation_context,
+                    )
 
         try:
             answer_text = self._call_llm(messages).strip()

@@ -163,8 +163,18 @@ class RAGPipeline:
         Routes through the agent when available, otherwise uses direct RAG.
         Stores the turn in memory if memory is enabled.
         """
+        conversation_context = ""
+
+        if self.memory:
+            conversation_context = self.memory.get_context(
+                num_turns=3
+            )
+
         if self.use_agent and self.agent:
-            result = self.agent.query(question)
+            result = self.agent.query(
+                question,
+                conversation_context=conversation_context,
+            )
         else:
             result = self._query_direct(question)
 

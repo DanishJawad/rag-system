@@ -12,6 +12,7 @@ Route = Literal["retrieve", "direct"]
 
 class AgentState(TypedDict):
     question: str
+    conversation_context: str
     route: Route
     answer: str
     retrieved_chunks: List[Dict[str, Any]]
@@ -160,9 +161,10 @@ direct
     def generate_node(self, state: AgentState):
         """Generate a grounded answer from retrieved chunks."""
         result = self.generator.generate_answer(
-            state["question"],
-            state["retrieved_chunks"],
-        )
+                    state["question"],
+                    state["retrieved_chunks"],
+                    state.get("conversation_context", ""),
+                )
 
         answer = result["answer"]
         state["answer"] = answer
@@ -208,7 +210,15 @@ direct
                         "Do not fabricate citations."
                     )
                 ),
-                HumanMessage(content=state["question"]),
+                HumanMessage(
+                            content=f"""
+                                        Conversation History:
+                                        {state.get("conversation_context", "")}
+
+                                        Current Question:
+                                        {state["question"]}
+                                    """
+                ),
             ]
         )
 
@@ -218,10 +228,11 @@ direct
 
         return state
 
-    def query(self, question: str) -> Dict:
+    def query(self, question: str, conversation_context: str = "") -> Dict:
         """Execute the agent workflow for a question."""
         initial_state: AgentState = {
             "question": question,
+            "conversation_context": conversation_context,
             "route": "retrieve",
             "answer": "",
             "retrieved_chunks": [],
