@@ -47,8 +47,6 @@ streamlit run streamlit_app.py
 
 Open **http://localhost:8501**
 
-> **CLI alternative:** `python app.py`
-
 ---
 
 ## Environment Variables
@@ -118,7 +116,6 @@ Return: Answer + Sources (if grounded) + Strategy + Reasoning
 | `src/memory.py` | Conversation history, follow-up detection |
 | `src/rag_pipeline.py` | Orchestrates all components, dependency injection |
 | `streamlit_app.py` | Streamlit web interface |
-| `app.py` | CLI interface |
 
 ---
 
@@ -280,7 +277,6 @@ rag-system/
 │   ├── chroma/              # Persistent vector store
 │   └── embeddings.npy       # Cached embeddings
 ├── streamlit_app.py         # Streamlit web interface
-├── app.py                   # CLI interface
 ├── pyproject.toml           # Dependencies (uv)
 ├── .env.example             # Environment variable template
 └── README.md                # This file
@@ -363,6 +359,8 @@ Visit http://localhost:8501 and try:
 3. "What's the capital of France?"
 4. "How does quantum computing work?"
 
+Watch the agent routing, retrieval, and generation happen in real-time.
+
 ---
 
 ## Development Notes
@@ -387,3 +385,4 @@ result = pipeline.query("your question")
 print(f"Total: {time.time() - start:.2f}s")
 ```
 
+---
