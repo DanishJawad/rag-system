@@ -1,75 +1,59 @@
 #!/usr/bin/env python3
-"""
-Minimal Streamlit UI for RAG Pipeline.
-Simple, fast, and focused on core functionality.
-"""
-
 import streamlit as st
 from src.rag_pipeline import RAGPipeline
 
-# Configure page
-st.set_page_config(page_title="RAG Q&A", page_icon="🔍", layout="centered")
+st.set_page_config(page_title="RAG Q&A", page_icon="🔍")
+st.title("RAG Research Paper Q&A")
 
-# Title
-st.title("🔍 RAG Research Papers Q&A")
-st.markdown("Ask questions about the research papers in the knowledge base.")
-
-# Cache pipeline (loads once)
 @st.cache_resource
 def load_pipeline():
-    """Load RAG pipeline once and cache it."""
-    return RAGPipeline()
+    return RAGPipeline(use_agent=True, use_memory=True)
 
-# Load pipeline
-try:
-    pipeline = load_pipeline()
-except Exception as e:
-    st.error(f"❌ Failed to load pipeline: {e}")
-    st.info("Make sure Ollama is running: `ollama serve`")
-    st.stop()
+pipeline = load_pipeline()
+stats = pipeline.stats()
 
-# Show stats
+# Sidebar
 with st.sidebar:
-    st.header("📊 Stats")
-    stats = pipeline.stats()
-    st.metric("Total Chunks", stats["total_chunks"])
-    st.metric("Vector Store", stats["vector_store"])
-    st.metric("Retrieval K", stats["retrieval_k"])
+    st.subheader("System Status")
+    st.write(f"Chunks indexed: **{stats['total_chunks']}**")
+    st.write(f"Agent: {'enabled' if stats['agent_enabled'] else 'disabled'}")
+    st.write(f"Memory turns: **{stats['conversation_turns']}**")
+    if st.button("Clear Memory"):
+        pipeline.clear_memory()
+        st.rerun()
 
 # Question input
 st.markdown("---")
-question = st.text_input("❓ Your question:", placeholder="e.g., What is Dense Passage Retrieval?")
+question = st.text_input("Ask a question:", placeholder="What is Dense Passage Retrieval?")
 
-# Submit button
-if st.button("Submit", type="primary", use_container_width=True):
-    if not question.strip():
-        st.warning("Please enter a question.")
+if question:
+    with st.spinner("Thinking..."):
+        result = pipeline.query_with_context(question)
+
+    strategy = result.get("strategy", "")
+    if strategy == "RETRIEVE":
+        st.caption(f"Strategy: RETRIEVE — answered from documents")
     else:
-        with st.spinner("🔍 Searching and generating answer..."):
-            try:
-                result = pipeline.query(question)
-                
-                # Display answer
-                st.subheader("📝 Answer")
-                answer = result.get("answer", "").strip()
-                
-                # Check if hallucination guard was triggered
-                guard_phrase = "I don't have enough information"
-                if guard_phrase in answer:
-                    st.info(f"**⚠️ Grounding Guard:** {answer}")
-                else:
-                    st.success(answer)
-                
-                # Display sources
-                sources = result.get("sources", [])
-                if sources:
-                    st.subheader("📚 Sources")
-                    for src in sources:
-                        st.write(f"- **{src['document']}**")
-                
-            except Exception as e:
-                st.error(f"Error: {e}")
+        st.caption(f"Strategy: DIRECT — answered from model knowledge")
 
-# Footer
-st.markdown("---")
-st.caption("Built with Streamlit + Ollama + Chroma for RAG assessment")
+    st.write(result["answer"])
+
+    if result.get("sources"):
+        st.subheader("Sources")
+        for src in result["sources"]:
+            st.write(f"- {src['document']}")
+
+    if result.get("agent_thoughts"):
+        with st.expander("Agent Reasoning"):
+            for thought in result["agent_thoughts"]:
+                st.write(thought)
+
+# Conversation history
+history = pipeline.get_memory() or []
+if history:
+    st.markdown("---")
+    st.subheader("Conversation History")
+    for turn in reversed(history[-5:]):
+        with st.expander(f"Q: {turn['question'][:70]}"):
+            st.write(f"**Q:** {turn['question']}")
+            st.write(f"**A:** {turn['answer'][:400]}")
