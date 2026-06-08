@@ -4,7 +4,7 @@ A Retrieval-Augmented Generation (RAG) system that answers questions grounded st
 
 ---
 
-## Stretch Goals Implemented ✅
+## Stretch Goals Implemented 
 
 This submission includes **two stretch goals** beyond core requirements, both fully integrated:
 
@@ -296,7 +296,7 @@ LLM sees:
   A: Dense Passage Retrieval is...
   
   Current Question: Tell me more about it
-Answer: Understands "it" = DPR ✅
+Answer: Understands "it" = DPR 
 ```
 
 ### Performance Trade-off
