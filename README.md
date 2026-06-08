@@ -465,33 +465,3 @@ Visit http://localhost:8501 and try:
 
 Watch the agent routing, retrieval, context injection, and generation happen in real-time.
 
----
-
-## Development Notes
-
-### Logging
-Set `LOGGING_LEVEL` environment variable (default: `INFO`):
-```bash
-LOGGING_LEVEL=DEBUG streamlit run streamlit_app.py
-```
-
-### Disabling Agent or Memory
-```python
-# Disable both
-pipeline = RAGPipeline(use_agent=False, use_memory=False)
-
-# Disable only memory
-pipeline = RAGPipeline(use_agent=True, use_memory=False)
-
-# Agent still works, memory still works, just not together
-```
-
-### Profile Queries
-Check how long each step takes:
-```python
-import time
-start = time.time()
-result = pipeline.query("your question")
-print(f"Total: {time.time() - start:.2f}s")
-```
-
